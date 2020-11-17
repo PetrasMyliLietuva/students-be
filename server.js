@@ -25,7 +25,21 @@ app.use(bp.json());
 app.use(cors());
 
 app.get("/", (req, res) => {
-  res.send("OK");
+  let submitTime = new Date().getHours();
+  if (submitTime >= 18 && submitTime < 22) {
+    con.query("SELECT * FROM students", (err, result) => {
+      if (err) {
+        console.log(err);
+        res.status(400).send("Problem with selection from database.");
+      } else {
+        res.status(200).json(result);
+      }
+    });
+  } else {
+    res.status(400).send("It's too late to register on today's class.");
+  }
 });
+
+app.get("/");
 
 app.listen(port, () => console.log("Server is running"));
