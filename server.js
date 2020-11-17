@@ -5,6 +5,7 @@ const mysql = require("mysql");
 require("dotenv").config();
 
 const port = process.env.SERVER_PORT || 8080;
+const adminPassword = process.env.ADMIN_PASS || "admin";
 
 const con = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -88,6 +89,28 @@ app.post("/register", (req, res) => {
     res
       .status(400)
       .send("The provided student id, name or surname is not correct.");
+  }
+});
+
+app.post("/delete", (req, res) => {
+  if (req.body.id && req.body.pass === adminPassword) {
+    con.query(
+      `DELETE FROM attendance WHERE id = '${req.body.id}'`,
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res
+            .status(400)
+            .send("There was an error with the DB when deleting a record.");
+        } else {
+          res.status(200).json(result);
+        }
+      }
+    );
+  } else {
+    res
+      .status(400)
+      .json({ message: "The password is wrong or the entry not exist." });
   }
 });
 
