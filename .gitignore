@@ -3,3 +3,6 @@
 
 ######### NODE MODULES ####################
 /node_modules/
+
+######### EXTRA TOOLS  ####################
+.vscode

@@ -24,9 +24,23 @@ const app = express();
 app.use(bp.json());
 app.use(cors());
 
+function checkDate() {
+  let date = new Date();
+  return date.getHours() >= 18 &&
+    date.getHours() < 22 &&
+    date.getDay() >= 1 &&
+    date.getDay() < 5
+    ? true
+    : false;
+}
+
 app.get("/", (req, res) => {
-  let submitTime = new Date().getHours();
-  if (submitTime >= 18 && submitTime < 22) {
+  res.send("The server and database is working fine.");
+});
+
+app.get("/students", (req, res) => {
+  console.log(checkDate());
+  if (checkDate()) {
     con.query("SELECT * FROM students", (err, result) => {
       if (err) {
         console.log(err);
@@ -36,10 +50,45 @@ app.get("/", (req, res) => {
       }
     });
   } else {
-    res.status(400).send("It's too late to register on today's class.");
+    res.status(400).send("There's no active class at the moment to register.");
   }
 });
 
-app.get("/");
+app.post("/register", (req, res) => {
+  let data = req.body;
+  if (
+    data.length === 1 &&
+    data.id.toUpperCase() === data.id.toLowerCase() &&
+    data.id > 0
+  ) {
+    console.log(data);
+    if (checkDate()) {
+      con.query(
+        `INSERT INTO attendance (student_id, date) VALUES('${
+          data.id
+        }', '${new Date().toLocaleDateString("lt-LT")}')`,
+        (err, result) => {
+          if (err) {
+            console.log(err);
+            res
+              .status(400)
+              .send(
+                "Problem with posting to SQL database. Please try again later."
+              );
+          } else {
+            res.status(200).send("ok");
+            console.log(result);
+          }
+        }
+      );
+    } else {
+      res.status(400).send("There is no active lectures to Register.");
+    }
+  } else {
+    res
+      .status(400)
+      .send("The provided student id, name or surname is not correct.");
+  }
+});
 
 app.listen(port, () => console.log("Server is running"));
