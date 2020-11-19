@@ -94,18 +94,31 @@ app.post("/register", (req, res) => {
     if (checkDate()) {
       let date = new Date().toLocaleDateString("lt-LT");
       con.query(
-        `INSERT INTO attendance (student_id, date) VALUES(${data.id}, '${date}')`,
+        `SELECT * FROM attendance WHERE date = '${date}' AND id = ${data.id}`,
         (err, result) => {
           if (err) {
             console.log(err);
-            res
-              .status(400)
-              .send(
-                "Problem with posting to SQL database. Please try again later."
-              );
           } else {
-            res.status(200).send("ok");
-            console.log(result);
+            if (result.length === 0) {
+              con.query(
+                `INSERT INTO attendance (student_id, date) VALUES(${data.id}, '${date}')`,
+                (err, result) => {
+                  if (err) {
+                    console.log(err);
+                    res
+                      .status(400)
+                      .send(
+                        "Problem with posting to SQL database. Please try again later."
+                      );
+                  } else {
+                    res.status(200).send("ok");
+                    console.log(result);
+                  }
+                }
+              );
+            } else {
+              res.status(201).send("This student already registered.");
+            }
           }
         }
       );
