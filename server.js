@@ -104,7 +104,8 @@ app.get("/attendance", (req, res) => {
 });
 
 app.post("/delete", (req, res) => {
-  if (req.body.id && req.body.pass === adminPassword) {
+  console.log(req.body);
+  if (req.body.id && req.body.pass === "gaidys") {
     con.query(
       `DELETE FROM attendance WHERE id = '${req.body.id}'`,
       (err, result) => {
@@ -114,14 +115,13 @@ app.post("/delete", (req, res) => {
             .status(400)
             .send("There was an error with the DB when deleting a record.");
         } else {
-          res.status(200).json(result);
+          res.status(200).send(result);
+          console.log(result);
         }
       }
     );
   } else {
-    res
-      .status(400)
-      .json({ message: "The password is wrong or the entry not exist." });
+    res.status(400).send("The password is wrong or the entry not exist.");
   }
 });
 
