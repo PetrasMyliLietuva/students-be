@@ -55,6 +55,38 @@ app.get("/students", (req, res) => {
   }
 });
 
+function nameCase(text) {
+  let name = text.trim().toLowerCase();
+  return name[0].toUpperCase() + name.slice(1);
+}
+
+app.post("/students", (req, res) => {
+  console.log(req.body);
+  if (
+    req.body.name.trim() !== "" &&
+    req.body.surname.trim() !== "" &&
+    req.body.email.trim() !== ""
+  ) {
+    con.query(
+      `INSERT INTO students (name, surname, email) VALUES('${nameCase(
+        req.body.name
+      )}','${nameCase(
+        req.body.surname
+      )}','${req.body.email.trim().toLowerCase()}')`,
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.status(400).send("Problem with database.");
+        } else {
+          res.status(200).json(result);
+        }
+      }
+    );
+  } else {
+    res.status(400).send("Check what you post.");
+  }
+});
+
 app.post("/register", (req, res) => {
   let data = req.body;
   if (data.id > 0) {
