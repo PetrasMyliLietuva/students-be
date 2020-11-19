@@ -57,17 +57,12 @@ app.get("/students", (req, res) => {
 
 app.post("/register", (req, res) => {
   let data = req.body;
-  if (
-    data.length === 1 &&
-    data.id.toUpperCase() === data.id.toLowerCase() &&
-    data.id > 0
-  ) {
+  if (data.id > 0) {
     console.log(data);
     if (checkDate()) {
+      let date = new Date().toLocaleDateString("lt-LT");
       con.query(
-        `INSERT INTO attendance (student_id, date) VALUES('${
-          data.id
-        }', '${new Date().toLocaleDateString("lt-LT")}')`,
+        `INSERT INTO attendance (student_id, date) VALUES(${data.id}, '${date}')`,
         (err, result) => {
           if (err) {
             console.log(err);
@@ -90,6 +85,22 @@ app.post("/register", (req, res) => {
       .status(400)
       .send("The provided student id, name or surname is not correct.");
   }
+});
+
+app.get("/attendance", (req, res) => {
+  let date = new Date().toLocaleDateString("lt-LT");
+  console.log(date);
+  con.query(
+    `SELECT attendance.id, students.name, students.surname FROM students INNER JOIN attendance ON attendance.student_id = students.id WHERE date = '${date}'`,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.status(400).send("Problem with selection from database.");
+      } else {
+        res.status(200).json(result);
+      }
+    }
+  );
 });
 
 app.post("/delete", (req, res) => {
