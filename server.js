@@ -41,7 +41,7 @@ app.get("/", (req, res) => {
 
 app.get("/students", (req, res) => {
   console.log(checkDate());
-  if (checkDate()) {
+  if (!checkDate()) {
     con.query("SELECT * FROM students", (err, result) => {
       if (err) {
         console.log(err);
@@ -91,14 +91,15 @@ app.post("/register", (req, res) => {
   let data = req.body;
   if (data.id > 0) {
     console.log(data);
-    if (checkDate()) {
+    if (!checkDate()) {
       let date = new Date().toLocaleDateString("lt-LT");
       con.query(
-        `SELECT * FROM attendance WHERE date = '${date}' AND id = ${data.id}`,
+        `SELECT id, student_id FROM attendance WHERE date = '${date}' AND student_id = '${data.id}'`,
         (err, result) => {
           if (err) {
             console.log(err);
           } else {
+            console.log(result);
             if (result.length === 0) {
               con.query(
                 `INSERT INTO attendance (student_id, date) VALUES(${data.id}, '${date}')`,
